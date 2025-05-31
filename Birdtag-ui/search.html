@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BirdTag - Search</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+      width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #2e86de;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1f6ec0;
+    }
+
+    #message {
+      margin-top: 15px;
+      color: red;
+    }
+
+    #results {
+      margin-top: 25px;
+      text-align: left;
+      background-color: #f4f6f8;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px dashed #bbb;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔎 Search Uploaded Files</h2>
+    <input type="text" id="searchInput" placeholder="Enter tag, species, filename..." />
+    <button onclick="performSearch()">Search</button>
+
+    <div id="message"></div>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    function performSearch() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const message = document.getElementById("message");
+      const results = document.getElementById("results");
+
+      message.innerText = "";
+      results.style.display = "none";
+
+      if (!keyword) {
+        message.innerText = "Please enter a keyword to search.";
+        return;
+      }
+
+      
+      results.innerHTML = `
+        <strong>Results for "<em>${keyword}</em>":</strong><br/><br/>
+        • File: bird_song_${keyword}.wav<br/>
+        • Detected Tag: ${keyword}<br/>
+        • Confidence: 92.7%<br/>
+        • Location: Brisbane, QLD<br/>
+        • Date Uploaded: 2025-05-30
+      `;
+      results.style.display = "block";
+    }
+  </script>
+</body>
+</html>
