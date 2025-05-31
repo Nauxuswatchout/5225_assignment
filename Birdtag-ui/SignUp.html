@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Signup - BirdTag</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 350px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #e26ecf;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #cc5cb8;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #e26ecf;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🪶 BirdTag 注册</h2>
+
+    <input type="email" id="email" placeholder="e-mail" />
+    <input type="text" id="username" placeholder="username" />
+    <input type="password" id="password" placeholder="password" />
+    <input type="password" id="confirmPassword" placeholder="Confirm password" />
+    <button onclick="signup()">login</button>
+
+    <p id="message" class="error"></p>
+    <p>Already have an account？<a href="login.html">Back to Login</a></p>
+  </div>
+
+  <script>
+    function isValidPassword(password) {
+      const startsWithUppercase = /^[A-Z]/.test(password);
+      const hasLettersAndNumbers = /[A-Za-z]/.test(password) && /\d/.test(password);
+      const validLength = password.length >= 8 && password.length <= 16;
+      return startsWithUppercase && hasLettersAndNumbers &&  validLength;
+    }
+
+    function signup() {
+      const email = document.getElementById("email").value;
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const message = document.getElementById("message");
+      message.innerText = "";
+
+
+      if (password !== confirmPassword) {
+        message.innerText = "❌ Two passwords are different, please enter again";
+        return;
+      }
+
+      if (!isValidPassword(password)) {
+        message.innerText = "Invalid Password, please enter again";
+        return;
+      }
+
+      
+      localStorage.setItem(email, JSON.stringify({ username, password }));
+      alert("✅ Login Successfully！");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
