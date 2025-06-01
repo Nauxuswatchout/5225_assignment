@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BirdTag - Main Activity</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 50px;
+      text-align: center;
+    }
+
+    /* Unified container */
+    .main-box {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    img {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 20px auto;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      font-size: 20px;
+      background-color: #0077c8;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .btn:hover {
+      background-color: #005fa3;
+    }
+
+    .logout {
+      margin-top: 20px;
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-box">
+    <img src="Picture/MonashLogo.png" alt="Monash Logo" />
+    <h2>Welcome to BirdTag</h2>
+
+    <a class="btn" href="upload.html">📤 Upload Media</a>
+    <a class="btn" href="search.html">🔍 Search Media</a>
+    <a class="btn" href="result.html?file_id=latest">🖼️ View Latest File</a>
+
+    <div class="logout" onclick="logout()">🚪 Log out</div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("jwt_token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("jwt_token");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
