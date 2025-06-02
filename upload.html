@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BirdTag - Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      padding: 40px;
+    }
+
+    .main-box {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .main-box img {
+      width: 200px;
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin: 15px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #0077c8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .status {
+      margin-top: 15px;
+      color: green;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 30px;
+        background-color: #0077c8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-box">
+    <img src="Picture/MonashLogo.png" alt="Monash Logo" />
+    <h2>Upload Bird Media</h2>
+
+    <input type="file" id="mediaFile" />
+    <button onclick="uploadFile()">Upload</button>
+
+    <p id="status" class="status"></p>
+
+    <!-- ✅ Back to main menu button -->
+    <a href="mainActivity.html" class="back-btn">← Back to Main Menu</a>
+  </div>
+
+  <script>
+    async function uploadFile() {
+      const fileInput = document.getElementById("mediaFile");
+      const status = document.getElementById("status");
+      status.textContent = "";
+
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select a file.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("https://your-api.com/upload", {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("jwt_token")
+          }
+        });
+
+        if (!response.ok) {
+          status.textContent = "Upload failed.";
+          return;
+        }
+
+        status.textContent = "Upload successful! File will be tagged automatically.";
+
+      } catch (error) {
+        console.error("Upload error:", error);
+        status.textContent = "Error occurred during upload.";
+      }
+    }
+  </script>
+</body>
+</html>
