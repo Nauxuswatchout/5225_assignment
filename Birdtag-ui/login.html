@@ -55,6 +55,21 @@
       text-decoration: none;
       color: #4a90e2;
     }
+
+    .divider {
+      text-align: center;
+      margin: 10px 0;
+      color: #999;
+    }
+
+    .cognito-btn {
+      background-color: #24292e;
+      color: #fff;
+    }
+
+    .cognito-btn:hover {
+      background-color: #000;
+    }
   </style>
 </head>
 <body>
@@ -62,9 +77,12 @@
     <h2>🪶 BirdTag Login</h2>
     <input type="email" id="email" placeholder="E-mail" />
     <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">login</button>
+    <button onclick="login()">Login (Local)</button>
     <p id="message" class="error"></p>
     <p>No Password？<a href="signup.html">Please register</a></p>
+
+    <div class="divider">— OR —</div>
+    <button class="cognito-btn" onclick="loginWithCognito()">Login with Cognito</button>
   </div>
 
   <script>
@@ -72,7 +90,7 @@
       const startsWithUppercase = /^[A-Z]/.test(password);
       const hasLettersAndNumbers = /[A-Za-z]/.test(password) && /\d/.test(password);
       const validLength = password.length >= 8 && password.length <= 16;
-      return startsWithUppercase && hasLettersAndNumbers  && validLength;
+      return startsWithUppercase && hasLettersAndNumbers && validLength;
     }
 
     function login() {
@@ -86,18 +104,19 @@
         return;
       }
 
-       if (!isValidPassword(password)) {
-      message.textContent = "Your password is invalid, please re-enter again.";
-      return;
-    }
-
       if (!isValidPassword(password)) {
-        message.innerText = "Invalid Password, please enter again";
+        message.textContent = "Your password is invalid, please re-enter again.";
         return;
       }
 
       alert("✅ Login Successfully");
       window.location.href = "userinfo.html";
+    }
+
+    function loginWithCognito() {
+    
+      const cognitoLoginUrl = "https://birdtag-auth-ui.auth.us-east-1.amazoncognito.com/login?client_id=mdjbcab9vbhuuddugnrv7bjsj&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A5500%2FBirdtag-ui%2Fdashboard.html";
+      window.location.href = cognitoLoginUrl;
     }
   </script>
 </body>

@@ -1,0 +1,30 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Query Results - BirdTag</title>
+</head>
+<body>
+  <h1>Query Results</h1>
+
+  <p><strong>Bird Tag:</strong> <span id="tagDisplay"></span></p>
+  <p><strong>Upload Date:</strong> <span id="dateDisplay"></span></p>
+
+  <h2>Matching Results:</h2>
+  <ul id="resultList">
+    <li>[Mock Result] Bird: Rainbow Lorikeet - Detected on 2025-05-30</li>
+    <li>[Mock Result] Bird: Sulphur-crested Cockatoo - Detected on 2025-05-27</li>
+  </ul>
+
+  <br>
+  <a href="dashboard.html">⬅ Back to Dashboard</a>
+
+  <script>
+
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("tagDisplay").textContent = params.get("tag") || "N/A";
+    document.getElementById("dateDisplay").textContent = params.get("date") || "N/A";
+  </script>
+</body>
+</html>

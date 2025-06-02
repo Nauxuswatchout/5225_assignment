@@ -1,108 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Signup - BirdTag</title>
+  <title>Sign Up</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #83a4d4, #b6fbff);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .card {
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      width: 350px;
+    .container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      width: 360px;
     }
 
     h2 {
       text-align: center;
-      color: #333;
+      margin-bottom: 20px;
     }
 
-    input, button {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border-radius: 5px;
       border: 1px solid #ccc;
     }
 
     button {
-      background-color: #e26ecf;
+      width: 100%;
+      background-color: #4CAF50;
       color: white;
+      padding: 12px;
+      margin-top: 12px;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
     }
 
-    button:hover {
-      background-color: #cc5cb8;
+    .btn-cognito {
+      background-color: #4285F4;
+      margin-top: 8px;
     }
 
-    .error {
+    button:disabled {
+      background-color: #888;
+      cursor: not-allowed;
+    }
+
+    #message {
+      margin-top: 10px;
       color: red;
       font-size: 14px;
     }
 
-    a {
-      text-decoration: none;
-      color: #e26ecf;
+    .valid {
+      color: green;
+    }
+
+    .invalid {
+      color: red;
+    }
+
+    ul {
+      padding-left: 20px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🪶 BirdTag Signup</h2>
+  <div class="container">
+    <h2>Sign Up</h2>
 
-    <input type="email" id="email" placeholder="e-mail" />
-    <input type="text" id="username" placeholder="username" />
-    <input type="password" id="password" placeholder="password" />
-    <input type="password" id="confirmPassword" placeholder="Confirm password" />
-    <button onclick="signup()">login</button>
+    <label>Username:</label>
+    <input type="text" id="username" required />
 
-    <p id="message" class="error"></p>
-    <p>Already have an account？<a href="login.html">Back to Login</a></p>
+    <label>Given Name:</label>
+    <input type="text" id="givenName" required />
+
+    <label>Family Name:</label>
+    <input type="text" id="familyName" required />
+
+    <label>Email:</label>
+    <input type="email" id="email" required />
+
+    <label>Password:</label>
+    <input type="password" id="password" required />
+
+    <label>Confirm Password:</label>
+    <input type="password" id="confirmPassword" required />
+
+    <ul>
+      <li id="lower" class="invalid">✘ At least one lowercase letter</li>
+      <li id="upper" class="invalid">✘ At least one uppercase letter</li>
+      <li id="number" class="invalid">✘ At least one number</li>
+      <li id="special" class="invalid">✘ At least one special character or space</li>
+      <li id="length" class="invalid">✘ At least 8 characters</li>
+      <li id="nospace" class="invalid">✘ No leading or trailing spaces</li>
+    </ul>
+
+    <div id="message"></div>
+    <button id="signupBtn" disabled>Register (Local)</button>
+    <button class="btn-cognito" id="cognitoSignupBtn">Sign up with Cognito</button>
   </div>
 
   <script>
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("confirmPassword");
+    const signupBtn = document.getElementById("signupBtn");
+    const cognitoBtn = document.getElementById("cognitoSignupBtn");
+    const message = document.getElementById("message");
+
+    const lower = document.getElementById("lower");
+    const upper = document.getElementById("upper");
+    const number = document.getElementById("number");
+    const special = document.getElementById("special");
+    const length = document.getElementById("length");
+    const nospace = document.getElementById("nospace");
+
     function isValidPassword(password) {
-      const startsWithUppercase = /^[A-Z]/.test(password);
-      const hasLettersAndNumbers = /[A-Za-z]/.test(password) && /\d/.test(password);
-      const validLength = password.length >= 8 && password.length <= 16;
-      return startsWithUppercase && hasLettersAndNumbers &&  validLength;
+      const checks = {
+        lower: /[a-z]/.test(password),
+        upper: /[A-Z]/.test(password),
+        number: /\d/.test(password),
+        special: /[^a-zA-Z0-9]/.test(password) || /\s/.test(password),
+        length: password.length >= 8,
+        nospace: password === password.trim()
+      };
+
+      lower.className = checks.lower ? "valid" : "invalid";
+      upper.className = checks.upper ? "valid" : "invalid";
+      number.className = checks.number ? "valid" : "invalid";
+      special.className = checks.special ? "valid" : "invalid";
+      length.className = checks.length ? "valid" : "invalid";
+      nospace.className = checks.nospace ? "valid" : "invalid";
+
+      return Object.values(checks).every(Boolean);
     }
 
-    function signup() {
-      const email = document.getElementById("email").value;
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-      const message = document.getElementById("message");
-      message.innerText = "";
+    function validateForm() {
+      const pwd = passwordInput.value;
+      const confirm = confirmInput.value;
 
+      const valid = isValidPassword(pwd);
 
-      if (password !== confirmPassword) {
-        message.innerText = "❌ Two passwords are different, please enter again";
+      if (pwd !== confirm) {
+        message.textContent = "❌ Passwords do not match.";
+        signupBtn.disabled = true;
         return;
       }
 
-      if (!isValidPassword(password)) {
-        message.innerText = "Invalid Password, please enter again";
+      if (!valid) {
+        message.textContent = "❌ Password does not meet all requirements.";
+        signupBtn.disabled = true;
         return;
       }
 
-      
-      localStorage.setItem(email, JSON.stringify({ username, password }));
-      alert("✅ Login Successfully！");
-      window.location.href = "login.html";
+      message.textContent = "";
+      signupBtn.disabled = false;
     }
+
+    passwordInput.addEventListener("input", validateForm);
+    confirmInput.addEventListener("input", validateForm);
+
+    // Cognito Hosted UI signup
+    cognitoBtn.addEventListener("click", function () {
+        const clientId = "mdjbcab9vbhuuddugnrv7bjsj";
+        const redirectUri = "http://localhost:5500/Birdtag-ui/dashboard.html";
+        const domain = "https://birdtag-auth-ui.auth.us-east-1.amazoncognito.com";
+ 
+
+      const signupUrl = `${domain}/signup?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      window.location.href = signupUrl;
+    });
   </script>
 </body>
 </html>
