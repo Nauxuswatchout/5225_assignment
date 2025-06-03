@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>BirdTag - Upload</title>
+  <link rel="stylesheet" href="../css/common.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -54,13 +55,13 @@
     }
 
     .back-btn {
-        display: inline-block;
-        margin-top: 30px;
-        background-color: #0077c8;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
+      display: inline-block;
+      margin-top: 30px;
+      background-color: #0077c8;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
     }
 
     .back-btn:hover {
@@ -71,15 +72,19 @@
 
 <body>
   <div class="main-box">
-    <img src="Picture/MonashLogo.png" alt="Monash Logo" />
+    <!-- Monash logo -->
+    <img src="../Picture/MonashLogo.png" alt="Monash University Logo" />
+
     <h2>Upload Bird Media</h2>
 
-    <input type="file" id="mediaFile" />
+    <!-- Media file input -->
+    <input type="file" id="mediaFile" accept="image/*,video/*" />
     <button onclick="uploadFile()">Upload</button>
 
+    <!-- Status message -->
     <p id="status" class="status"></p>
 
-    <!-- ✅ Back to main menu button -->
+    <!-- Back to main menu -->
     <a href="mainActivity.html" class="back-btn">← Back to Main Menu</a>
   </div>
 
@@ -99,23 +104,28 @@
       formData.append("file", file);
 
       try {
+        // 🔧 模拟上传接口地址，记得部署后替换
         const response = await fetch("https://your-api.com/upload", {
           method: "POST",
           body: formData,
           headers: {
+            // ✅ 预留 JWT Token，用于后端认证（AWS Cognito）
             Authorization: "Bearer " + localStorage.getItem("jwt_token")
           }
         });
 
         if (!response.ok) {
+          status.style.color = "red";
           status.textContent = "Upload failed.";
           return;
         }
 
+        status.style.color = "green";
         status.textContent = "Upload successful! File will be tagged automatically.";
 
       } catch (error) {
         console.error("Upload error:", error);
+        status.style.color = "red";
         status.textContent = "Error occurred during upload.";
       }
     }

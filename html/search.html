@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>BirdTag - Search</title>
+  <link rel="stylesheet" href="../css/common.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -49,6 +50,9 @@
 
     .results {
       margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .results img {
@@ -64,36 +68,37 @@
     }
 
     .back-btn {
-        display: inline-block;
-        margin-top: 30px;
-        background-color: #0077c8;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
+      display: inline-block;
+      margin-top: 30px;
+      background-color: #0077c8;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
     }
 
     .back-btn:hover {
-        background-color: #005fa3;
+      background-color: #005fa3;
     }
   </style>
 </head>
 
 <body>
   <div class="main-box">
-    <img src="Picture/MonashLogo.png" alt="Monash Logo" />
+    <img src="../Picture/MonashLogo.png" />
     <h2>Search Files by Bird Tag</h2>
 
-    <!-- Input for tag and count -->
+    <!-- Tag input -->
     <input type="text" id="tag1" placeholder="Bird tag, e.g. crow" />
     <input type="number" id="count1" placeholder="Minimum count, e.g. 2" />
 
+    <!-- Search button -->
     <button onclick="search()">Search</button>
 
-    <!-- Search results -->
+    <!-- Results -->
     <div id="results" class="results"></div>
 
-    <!-- ✅ Back to main menu button -->
+    <!-- Return to main -->
     <a href="mainActivity.html" class="back-btn">← Back to Main Menu</a>
   </div>
 
@@ -117,6 +122,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            // ✅ 保留本地写死 token 或 AWS Cognito 认证
             Authorization: "Bearer " + localStorage.getItem("jwt_token")
           },
           body: JSON.stringify(query)

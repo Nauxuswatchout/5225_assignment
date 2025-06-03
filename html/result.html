@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>BirdTag - Media Detail</title>
+  <link rel="stylesheet" href="../css/common.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -84,7 +85,7 @@
 
 <body>
   <div class="main-box">
-    <img src="Picture/MonashLogo.png" alt="Monash Logo" />
+    <img src="../Picture/MonashLogo.png" />
     <h2>File Details</h2>
 
     <!-- Media preview -->
@@ -97,14 +98,14 @@
     <!-- Download button -->
     <a id="downloadLink" class="main-btn" href="#" download>Download File</a>
 
-    <!-- ✅ Back to main menu button (same as upload.html) -->
+    <!-- ✅ Back to main menu -->
     <a href="mainActivity.html" class="back-btn">← Back to Main Menu</a>
   </div>
 
   <script>
-    function getQueryParam(param) {
+    function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
+      return urlParams.get(name);
     }
 
     async function loadFileDetails() {
@@ -119,18 +120,18 @@
       }
 
       try {
-        const response = await fetch(`https://your-api.com/file-info?file_id=${fileId}`, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("jwt_token")
-          }
-        });
+        // 🔧 临时代码：模拟 mock 数据（本地测试用）
+        const mockData = {
+          full_url: "https://example.com/file1.jpg",
+          file_type: "image",
+          tags: { bird: 3, sky: 1 }
+        };
 
-        if (!response.ok) {
-          mediaPreview.innerHTML = "<p>Failed to load file metadata.</p>";
-          return;
-        }
+        // ✅ TODO: 替换为真实后端请求
+        // const response = await fetch(`https://your-api.com/file-info?file_id=${fileId}`);
+        // const data = await response.json();
 
-        const data = await response.json();
+        const data = mockData;
         const fileUrl = data.full_url;
         const fileType = data.file_type;
         const tags = data.tags;
@@ -138,29 +139,13 @@
         if (fileType === "image") {
           mediaPreview.innerHTML = `<img src="${fileUrl}" alt="Full Image" />`;
         } else if (fileType === "video") {
-          mediaPreview.innerHTML = `
-            <video controls>
-              <source src="${fileUrl}" type="video/mp4">
-              Your browser does not support video playback.
-            </video>`;
-        } else if (fileType === "audio") {
-          mediaPreview.innerHTML = `
-            <audio controls style="width: 100%">
-              <source src="${fileUrl}" type="audio/mpeg">
-              Your browser does not support audio playback.
-            </audio>`;
-        } else {
-          mediaPreview.innerHTML = `<p>Unsupported file type: ${fileType}</p>`;
-        }
-
-        tagList.innerHTML = "";
-        for (const tag in tags) {
-          const li = document.createElement("li");
-          li.textContent = `${tag}: ${tags[tag]}`;
-          tagList.appendChild(li);
+          mediaPreview.innerHTML = `<video controls><source src="${fileUrl}" type="video/mp4"></video>`;
         }
 
         downloadLink.href = fileUrl;
+        tagList.innerHTML = Object.entries(tags).map(
+          ([k, v]) => `<li>${k}: ${v}</li>`
+        ).join("");
 
       } catch (error) {
         console.error("Error loading file details:", error);
