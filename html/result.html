@@ -5,79 +5,85 @@
   <title>BirdTag - Media Detail</title>
   <link rel="stylesheet" href="../css/common.css" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      padding: 40px;
-      text-align: center;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden; /* ❗ 防止左右滑动 */
     }
 
     .main-box {
-      max-width: 600px;
-      margin: 40px auto;
+      width: 100%;
+      max-width: 400px;
       background-color: #ffffff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
-    .main-box img {
-      width: 120px;
+    .main-box img.logo {
+      width: 150px;
       margin-bottom: 20px;
     }
 
     h2 {
       margin-bottom: 20px;
+      color: #333;
     }
 
     .media-preview img,
     .media-preview video {
       width: 100%;
-      max-height: 400px;
+      max-height: 300px;
       border-radius: 8px;
       margin-bottom: 20px;
     }
 
+    h3 {
+      margin: 20px 0 10px;
+      color: #333;
+    }
+
     .tag-list {
       text-align: left;
-      margin-top: 20px;
       padding-left: 0;
       list-style: none;
+      margin-bottom: 20px;
     }
 
     .tag-list li {
       margin-bottom: 5px;
+      font-size: 15px;
     }
 
-    .main-btn {
+    .btn {
+      display: block;
       width: 100%;
       padding: 12px;
-      margin-top: 20px;
-      background-color: #0077c8;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      display: inline-block;
+      margin: 10px 0;
       font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    .main-btn:hover {
-      background-color: #005fa3;
-    }
-
-    .back-btn {
-      display: inline-block;
-      margin-top: 30px;
+      text-align: center;
       background-color: #0077c8;
       color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
       text-decoration: none;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
     }
 
-    .back-btn:hover {
+    .btn:hover {
       background-color: #005fa3;
     }
   </style>
@@ -85,7 +91,7 @@
 
 <body>
   <div class="main-box">
-    <img src="../Picture/MonashLogo.png" />
+    <img src="../Picture/MonashLogo.png" alt="Monash Logo" class="logo" />
     <h2>File Details</h2>
 
     <!-- Media preview -->
@@ -95,11 +101,9 @@
     <h3>Detected Tags:</h3>
     <ul id="tagList" class="tag-list"></ul>
 
-    <!-- Download button -->
-    <a id="downloadLink" class="main-btn" href="#" download>Download File</a>
-
-    <!-- ✅ Back to main menu -->
-    <a href="mainActivity.html" class="back-btn">← Back to Main Menu</a>
+    <!-- Action buttons -->
+    <a id="downloadLink" class="btn" href="#" download>⬇️ Download File</a>
+    <a href="mainActivity.html" class="btn">← Back to Main Menu</a>
   </div>
 
   <script>
@@ -120,14 +124,14 @@
       }
 
       try {
-        // 🔧 临时代码：模拟 mock 数据（本地测试用）
+        // 🧪 模拟数据
         const mockData = {
           full_url: "https://example.com/file1.jpg",
           file_type: "image",
           tags: { bird: 3, sky: 1 }
         };
 
-        // ✅ TODO: 替换为真实后端请求
+        // ✅ 替换为真实后端调用
         // const response = await fetch(`https://your-api.com/file-info?file_id=${fileId}`);
         // const data = await response.json();
 
@@ -143,9 +147,9 @@
         }
 
         downloadLink.href = fileUrl;
-        tagList.innerHTML = Object.entries(tags).map(
-          ([k, v]) => `<li>${k}: ${v}</li>`
-        ).join("");
+        tagList.innerHTML = Object.entries(tags)
+          .map(([key, value]) => `<li>${key}: ${value}</li>`)
+          .join("");
 
       } catch (error) {
         console.error("Error loading file details:", error);

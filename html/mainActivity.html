@@ -5,44 +5,54 @@
   <title>BirdTag - Main Activity</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 50px;
-      text-align: center;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .main-box {
-      max-width: 700px;
-      margin: 40px auto;
+      width: 400px;
       background-color: #ffffff;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       text-align: center;
     }
 
-    img {
+    .main-box img {
       width: 150px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
-    h2 {
-      margin-bottom: 30px;
+    .main-box h2 {
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .btn {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
+      width: 85%;
+      max-width: 300px;
       padding: 12px;
-      margin: 20px auto;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      font-size: 20px;
+      margin: 10px 0;
+      font-size: 16px;
       background-color: #0077c8;
       color: white;
       text-decoration: none;
-      border-radius: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-align: center;
     }
 
     .btn:hover {
@@ -63,11 +73,13 @@
     <img src="../Picture/MonashLogo.png" alt="Monash University Logo" />
     <h2>Welcome to BirdTag</h2>
 
-    <a class="btn" href="upload.html">📤 Upload Media</a>
-    <a class="btn" href="search.html">🔍 Search Media</a>
-    <a class="btn" href="result.html?file_id=latest">🖼️ View Latest File</a>
+    <div class="button-group">
+      <a class="btn" href="upload.html">📤 Upload Media</a>
+      <a class="btn" href="search.html">🔍 Search Media</a>
+      <a class="btn" href="result.html?file_id=latest">🖼️ View Latest File</a>
+    </div>
 
-    <div class="logout" onclick="logout()">🚪 Log out</div>
+    <div class="logout" onclick="logout()">📕 Log out</div>
   </div>
 
   <script>

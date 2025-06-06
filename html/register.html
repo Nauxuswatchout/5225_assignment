@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="../css/common.css" />
   <meta charset="UTF-8" />
   <title>BirdTag - Register</title>
+  <link rel="stylesheet" href="../css/common.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      padding: 40px;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .main-box {
-      max-width: 600px;
-      margin: 40px auto;
+      width: 400px;
       background-color: #ffffff;
       padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       text-align: center;
     }
 
     .main-box img {
-      width: 200px;
+      width: 180px;
       margin-bottom: 20px;
     }
 
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      color: #333;
     }
 
     input {
@@ -36,6 +40,8 @@
       margin: 10px 0;
       font-size: 16px;
       box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
 
     button {
@@ -45,9 +51,10 @@
       color: white;
       border: none;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 16px;
       box-sizing: border-box;
+      margin-top: 10px;
     }
 
     button:hover {
@@ -57,6 +64,7 @@
     .error {
       color: red;
       margin-top: 10px;
+      font-size: 14px;
     }
 
     .login-link {
@@ -105,7 +113,7 @@
       }
 
       try {
-        const response = await fetch("https://your-api.com/register", {  // ✅ 替换为你的 API Gateway 地址
+        const response = await fetch("https://your-api.com/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ firstname, lastname, email, password })

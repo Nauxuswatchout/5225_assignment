@@ -6,23 +6,26 @@
   <link rel="stylesheet" href="../css/common.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      padding: 40px;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .login-container {
       width: 360px;
-      margin: 0 auto;
       background-color: #ffffff;
       padding: 30px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
+      border-radius: 12px;
       text-align: center;
     }
 
     .login-container img {
-      max-width: 250px;
+      max-width: 220px;
       margin-bottom: 20px;
     }
 
@@ -34,6 +37,8 @@
       width: 100%;
       padding: 10px;
       margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
       box-sizing: border-box;
     }
 
@@ -43,6 +48,7 @@
       background-color: #0077c8;
       color: white;
       border: none;
+      border-radius: 6px;
       cursor: pointer;
       margin-top: 10px;
     }
@@ -54,29 +60,42 @@
     .error {
       color: red;
       margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .divider {
+      margin: 12px 0;
+      color: #999;
     }
 
     .register-link {
-      margin-top: 15px;
+      margin-top: 10px;
       display: block;
+    }
+
+    .cognito-btn {
+      background-color: #24292e;
+      color: #fff;
+    }
+
+    .cognito-btn:hover {
+      background-color: #000;
     }
   </style>
 </head>
 
 <body>
   <div class="login-container">
-    <!-- Monash Logo -->
     <img src="../Picture/MonashLogo.png" alt="Monash University Logo" />
-
-    <h2>Login to BirdTag</h2>
-
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Password" required />
+    <h2>🪶 BirdTag Login</h2>
+    <input type="email" id="email" placeholder="E-mail" />
+    <input type="password" id="password" placeholder="Password" />
     <button onclick="login()">Login</button>
-
     <p id="message" class="error"></p>
+    <p>No Password？<a href="signup.html">Please register</a></p>
 
-    <a href="register.html" class="register-link">Don't have an account? Register here</a>
+    <div class="divider">— OR —</div>
+    <button class="cognito-btn" onclick="loginWithCognito()">Login with Cognito</button>
   </div>
 
   <script>
@@ -86,7 +105,6 @@
       const message = document.getElementById('message');
       message.textContent = '';
 
-      // 写死的账号密码
       if (email === "admin@monash.edu" && password === "admin123") {
         localStorage.setItem("jwt_token", "test-token");
         window.location.href = "mainActivity.html";
@@ -109,11 +127,15 @@
         const token = data.token;
         localStorage.setItem("jwt_token", token);
         window.location.href = "mainActivity.html";
-
       } catch (error) {
         console.error("Login error:", error);
         message.textContent = "An error occurred during login. Please try again.";
       }
+    }
+
+    function loginWithCognito() {
+      const cognitoLoginUrl = "https://birdtag-auth-ui.auth.us-east-1.amazoncognito.com/login?client_id=mdjbcab9vbhuuddugnrv7bjsj&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A5500%2FBirdtag-ui%2Fdashboard.html";
+      window.location.href = cognitoLoginUrl;
     }
   </script>
 </body>
