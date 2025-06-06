@@ -9,14 +9,8 @@
       localStorage.removeItem("id_token");
       localStorage.removeItem("access_token");
 
-      // Cognito logout URL
-      const logoutUrl =
-        "https://us-east-1xhcstxrbd.auth.us-east-1.amazoncognito.com/logout?" +
-        "client_id=6a6kql6g305v3lumnpcm3e6du8&" +
-        "logout_uri=http://localhost:5500/Birdtag-ui/login.html";
-
-      // 跳转至 Cognito 登出并返回本地 login 页面
-      window.location.href = logoutUrl;
+      // 直接跳回本地 login 页面
+      window.location.href = "login.html";
     };
   </script>
 </head>
