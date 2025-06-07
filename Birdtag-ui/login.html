@@ -86,35 +86,51 @@
   </div>
 
   <script>
-    function isValidPassword(password) {
-      const startsWithUppercase = /^[A-Z]/.test(password);
-      const hasLettersAndNumbers = /[A-Za-z]/.test(password) && /\d/.test(password);
-      const validLength = password.length >= 8 && password.length <= 16;
-      return startsWithUppercase && hasLettersAndNumbers && validLength;
-    }
-
-    function login() {
+    async function login() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const message = document.getElementById("message");
       message.innerText = "";
 
-      if (!localStorage.getItem(email)) {
-        message.innerHTML = `Your account has not been registered, please <a href="signup.html">register first</a>!`;
+      if (!email || !password) {
+        message.textContent = "Please enter both email and password.";
         return;
       }
 
-      if (!isValidPassword(password)) {
-        message.textContent = "Your password is invalid, please re-enter again.";
-        return;
-      }
+      try {
+        const response = await fetch("http://localhost:8000/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: email,
+            password: password
+          })
+        });
 
-      alert("✅ Login Successfully");
-      window.location.href = "userinfo.html";
+        const data = await response.json();
+
+        if (!response.ok) {
+          // 显示后端返回的错误信息
+          message.textContent = data.detail || "Login failed.";
+          return;
+        }
+
+        // 成功，保存 token
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("id_token", data.id_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+
+        alert("✅ Login Successfully");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        console.error("Login error:", error);
+        message.textContent = "Error occurred during login.";
+      }
     }
 
     function loginWithCognito() {
-    
       const cognitoLoginUrl = "https://birdtag-auth-ui.auth.us-east-1.amazoncognito.com/login?client_id=4quucr17sofk8c874jlhm29g0o&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A5500%2FBirdtag-ui%2Fdashboard.html";
       window.location.href = cognitoLoginUrl;
     }
