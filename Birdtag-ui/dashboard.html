@@ -63,5 +63,59 @@
     <button onclick="location.href='result.html'">📊 View Query Results</button>
     <button class="logout" onclick="location.href='logout.html'">🚪 Sign Out</button>
   </div>
+ <!-- Add OAuth code -> token handling script -->
+  <script>
+    (async function handleOAuthCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (code) {
+        console.log("Found code:", code);
+
+        const clientId = "4quucr17sofk8c874jlhm29g0o";  // 你的 ClientId
+        const redirectUri = "http://localhost:5500/Birdtag-ui/dashboard.html";
+        const tokenUrl = "https://birdtag-auth-ui.auth.us-east-1.amazoncognito.com/oauth2/token";
+        const clientSecret = "bim9cvkkua3443kam6vrr5jar1umu8p0rmdi6b8c520r9knm42r";
+
+        const body = new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: clientId,
+          code: code,
+          redirect_uri: redirectUri
+        });
+
+        const basicAuth = btoa(`${clientId}:${clientSecret}`);
+
+        try {
+          const response = await fetch(tokenUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': `Basic ${basicAuth}`
+            },
+            body: body.toString()
+          });
+          console.log("Response status:", response.status); // ✅ 加一行打印 status
+          console.log("Response headers:", response.headers); // ✅ 可以看 header
+  
+
+          const data = await response.json();
+          console.log("Token response:", data);
+
+          if (data.id_token) {
+            localStorage.setItem("id_token", data.id_token);
+            localStorage.setItem("access_token", data.access_token);
+            alert("Login successful! Tokens saved.");
+            // 清除 URL 中的 code 参数
+            window.history.replaceState({}, document.title, redirectUri);
+          } else {
+            alert("Failed to obtain tokens.");
+          }
+        } catch (error) {
+          console.error("Error exchanging code for tokens:", error);
+        }
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -2,134 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>BirdTag - Upload</title>
+  <title>BirdTag - Upload Media</title>
   <link rel="stylesheet" href="../css/common.css" />
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #89f7fe, #66a6ff);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .main-box {
-      width: 100%;
-      max-width: 400px;
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      overflow-y: auto;
-    }
-
-    .main-box img {
-      width: 150px;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    input[type="file"] {
-      width: 100%;
-      margin: 15px 0;
-      font-size: 16px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-      text-align: center;
-      background-color: #0077c8;
-      color: white;
-      text-decoration: none;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      display: inline-block;
-    }
-
-    .btn:hover {
-      background-color: #005fa3;
-    }
-
-    .status {
-      margin-top: 15px;
-      font-size: 14px;
-    }
-  </style>
 </head>
 
 <body>
   <div class="main-box">
-    <img src="../Picture/MonashLogo.png" alt="Monash University Logo" />
-
+    <img src="../Picture/MonashLogo.png" alt="Monash Logo" />
     <h2>Upload Bird Media</h2>
 
-    <!-- File input -->
-    <input type="file" id="mediaFile" accept="image/*,video/*" />
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">⬆ Upload</button>
 
-    <!-- Upload button -->
-    <button class="btn" onclick="uploadFile()">⬆️ Upload</button>
+    <div id="uploadStatus"></div>
 
-    <!-- Status message -->
-    <p id="status" class="status"></p>
-
-    <!-- Back to menu -->
-    <a class="btn" href="dashboard.html">← Back to Main Menu</a>
+    <a class="btn" href="dashboard.html">← Back to Dashboard</a>
   </div>
 
   <script>
     async function uploadFile() {
-      const fileInput = document.getElementById("mediaFile");
-      const status = document.getElementById("status");
-      status.textContent = "";
-      status.style.color = "";
+      const file = document.getElementById("fileInput").files[0];
+      const statusDiv = document.getElementById("uploadStatus");
 
-      const file = fileInput.files[0];
       if (!file) {
-        alert("Please select a file.");
+        alert("Please select a file to upload.");
         return;
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
+      statusDiv.innerHTML = "Getting presigned URL...";
+
+      const idToken = localStorage.getItem('id_token');
+      if (!idToken) {
+        alert("No ID token found. Please login first.");
+        return;
+      }
 
       try {
-        const response = await fetch("https://your-api.com/upload", {
-          method: "POST",
-          body: formData,
+        // Step 1: 获取 presigned URL
+        const presignedResponse = await fetch("https://pzsjhrvhz8.execute-api.us-east-1.amazonaws.com/default/get-upload-url", {
+          method: "GET",
           headers: {
-            Authorization: "Bearer " + localStorage.getItem("jwt_token")
+            Authorization: `Bearer ${idToken}`
           }
         });
 
-        if (!response.ok) {
-          status.style.color = "red";
-          status.textContent = "Upload failed.";
-          return;
+        if (!presignedResponse.ok) {
+          throw new Error(`Failed to get presigned URL: ${presignedResponse.status}`);
         }
 
-        status.style.color = "green";
-        status.textContent = "Upload successful! File will be tagged automatically.";
+        const uploadInfo = await presignedResponse.json();
+        const uploadUrl = uploadInfo.upload_url;
+
+        console.log("Got presigned URL:", uploadUrl);
+
+        // Step 2: 用 PUT 上传文件
+        statusDiv.innerHTML = "Uploading file...";
+
+        const putResponse = await fetch(uploadUrl, {
+          method: "PUT",
+          body: file
+        });
+
+        if (!putResponse.ok) {
+          throw new Error(`Failed to upload file: ${putResponse.status}`);
+        }
+
+        statusDiv.innerHTML = "✅ Upload successful!";
+        console.log("Upload successful!");
+
       } catch (error) {
-        console.error("Upload error:", error);
-        status.style.color = "red";
-        status.textContent = "Error occurred during upload.";
+        console.error("Error during upload:", error);
+        statusDiv.innerHTML = "❌ Error occurred during upload. See console for details.";
       }
     }
   </script>
