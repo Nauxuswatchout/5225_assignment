@@ -29,46 +29,34 @@
         return;
       }
 
-      statusDiv.innerHTML = "Getting presigned URL...";
+      statusDiv.innerHTML = "Uploading file...";
 
-      const idToken = localStorage.getItem('id_token');
-      if (!idToken) {
-        alert("No ID token found. Please login first.");
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        alert("No access token found. Please login first.");
         return;
       }
 
       try {
-        // Step 1: 获取 presigned URL
-        const presignedResponse = await fetch("https://pzsjhrvhz8.execute-api.us-east-1.amazonaws.com/default/get-upload-url", {
-          method: "GET",
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("http://localhost:8000/upload", {
+          method: "POST",
+          body: formData,
           headers: {
-            Authorization: `Bearer ${idToken}`
+            Authorization: "Bearer " + accessToken
           }
         });
 
-        if (!presignedResponse.ok) {
-          throw new Error(`Failed to get presigned URL: ${presignedResponse.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to upload file: ${response.status}`);
         }
 
-        const uploadInfo = await presignedResponse.json();
-        const uploadUrl = uploadInfo.upload_url;
+        const data = await response.json();
 
-        console.log("Got presigned URL:", uploadUrl);
-
-        // Step 2: 用 PUT 上传文件
-        statusDiv.innerHTML = "Uploading file...";
-
-        const putResponse = await fetch(uploadUrl, {
-          method: "PUT",
-          body: file
-        });
-
-        if (!putResponse.ok) {
-          throw new Error(`Failed to upload file: ${putResponse.status}`);
-        }
-
-        statusDiv.innerHTML = "✅ Upload successful!";
-        console.log("Upload successful!");
+        statusDiv.innerHTML = "✅ Upload successful! File ID: " + data.file_id;
+        console.log("Upload successful!", data);
 
       } catch (error) {
         console.error("Error during upload:", error);
