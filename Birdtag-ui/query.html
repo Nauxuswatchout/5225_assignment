@@ -1,58 +1,39 @@
-<!-- query.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Submit BirdTag Query</title>
+    <meta charset="UTF-8">
+    <title>Query File Info - BirdTag</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-  <h1>BirdTag - Submit a Query</h1>
-  <form id="queryForm">
-    <label for="tag">Bird Tag:</label>
-    <input type="text" id="tag" name="tag" required><br><br>
+    <h2>Query File Info</h2>
 
-    <label for="date">Upload Date:</label>
-    <input type="date" id="date" name="date"><br><br>
+    <input type="text" id="fileIdInput" placeholder="Enter File ID">
+    <button onclick="queryFileInfo()">Query</button>
 
-    <input type="submit" value="Submit Query">
-  </form>
+    <script>
+        function queryFileInfo() {
+            const fileId = document.getElementById('fileIdInput').value.trim();
 
-  <div id="result"></div>
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
 
-  <br>
-  <a href="dashboard.html">⬅ Back to Dashboard</a>
-
-  <script>
-    const form = document.getElementById('queryForm');
-    form.addEventListener('submit', async function(event) {
-      event.preventDefault(); // prevent form from submitting normally
-
-      const tag = document.getElementById('tag').value;
-      const date = document.getElementById('date').value;
-
-      try {
-        const response = await fetch('https://v718z5kxih.execute-api.us-east-1.amazonaws.com/dev', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            tag: tag,
-            date: date
-          })
-        });
-
-        const data = await response.json();
-
-        // display the result
-        document.getElementById('result').innerText = JSON.stringify(data, null, 2);
-
-      } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('result').innerText = 'Error querying API.';
-      }
-    });
-  </script>
+            // 跳 result.html 带 file_id 参数
+            window.location.href = `result.html?file_id=${encodeURIComponent(fileId)}`;
+        }
+    </script>
 </body>
 </html>
-
