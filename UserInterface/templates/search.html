@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="search-container">
+    <h2>Search Images</h2>
+    <div class="search-info">
+        Enter any tags to search for images. Multiple tags will find images that contain all specified tags.
+    </div>
+    <div class="search-box">
+        <div class="tag-input-container">
+            <input type="text" id="tagInput" placeholder="Type a tag and press Enter">
+            <div class="tag-suggestions" id="tagSuggestions"></div>
+        </div>
+        <div class="selected-tags" id="selectedTags"></div>
+        <button type="button" onclick="searchImages()" class="search-button" id="searchButton">Search</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+</div>
+
+<style>
+.search-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-info {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.search-box {
+    margin-bottom: 2rem;
+}
+
+.tag-input-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+#tagInput {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+#tagInput:focus {
+    border-color: #000;
+    outline: none;
+}
+
+.tag-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.tag-suggestion {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.tag-suggestion:hover {
+    background-color: #f5f5f5;
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    min-height: 2rem;
+}
+
+.tag {
+    background-color: #000;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.tag-remove {
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.tag-remove:hover {
+    opacity: 1;
+}
+
+.search-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-button:hover:not(:disabled) {
+    background-color: #333;
+    transform: translateY(-1px);
+}
+
+.search-button:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.result-item {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    padding: 1rem;
+}
+
+.result-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.result-item .image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 宽高比 */
+    margin-bottom: 1rem;
+}
+
+.result-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #f8f9fa;
+}
+
+.result-item .url-info {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+    color: #666;
+    margin-top: 1rem;
+}
+
+.result-item .url-info .label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    grid-column: 1 / -1;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    grid-column: 1 / -1;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+let selectedTags = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tagInput = document.getElementById('tagInput');
+    const searchButton = document.getElementById('searchButton');
+    
+    updateSearchButton();
+    loadAvailableTags();
+    
+    tagInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            addTag(this.value.trim());
+            this.value = '';
+            e.preventDefault();
+        }
+    });
+
+    tagInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedText = e.clipboardData.getData('text');
+        const tags = pastedText.split(/[,\s]+/).filter(tag => tag.trim());
+        tags.forEach(tag => addTag(tag.trim()));
+    });
+});
+
+function loadAvailableTags() {
+    const tagSuggestions = document.getElementById('tagSuggestions');
+    
+    fetch('/api/list-topics', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            window.location.href = '/login';
+            throw new Error('Authentication expired, please login again');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && Array.isArray(data)) {
+            tagSuggestions.innerHTML = '';
+            data.forEach(tag => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'tag-suggestion';
+                suggestion.textContent = tag;
+                suggestion.onclick = () => {
+                    addTag(tag);
+                    document.getElementById('tagInput').value = '';
+                    tagSuggestions.style.display = 'none';
+                };
+                tagSuggestions.appendChild(suggestion);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Failed to load tags:', error);
+        if (error.message === 'Authentication expired, please login again') {
+            return;
+        }
+        tagSuggestions.innerHTML = `
+            <div class="tag-suggestion error">
+                Failed to load tags: ${error.message}
+            </div>
+        `;
+    });
+
+    document.getElementById('tagInput').addEventListener('input', function() {
+        const value = this.value.trim().toLowerCase();
+        const suggestions = tagSuggestions.getElementsByClassName('tag-suggestion');
+        let hasVisibleSuggestions = false;
+
+        Array.from(suggestions).forEach(suggestion => {
+            if (!suggestion.classList.contains('error')) {
+                const matches = suggestion.textContent.toLowerCase().includes(value);
+                suggestion.style.display = matches ? 'block' : 'none';
+                if (matches) hasVisibleSuggestions = true;
+            }
+        });
+
+        tagSuggestions.style.display = hasVisibleSuggestions && value ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.tag-input-container')) {
+            tagSuggestions.style.display = 'none';
+        }
+    });
+}
+
+function addTag(tag) {
+    if (!tag || selectedTags.includes(tag)) return;
+    
+    selectedTags.push(tag);
+    const selectedTagsContainer = document.getElementById('selectedTags');
+    const tagElement = document.createElement('div');
+    tagElement.className = 'tag';
+    tagElement.innerHTML = `
+        ${tag}
+        <span class="tag-remove" onclick="removeTag('${tag}')">×</span>
+    `;
+    selectedTagsContainer.appendChild(tagElement);
+    updateSearchButton();
+    
+    console.log('Added tag:', tag);
+    console.log('Current tags:', selectedTags);
+}
+
+function removeTag(tag) {
+    const index = selectedTags.indexOf(tag);
+    if (index > -1) {
+        selectedTags.splice(index, 1);
+        const selectedTagsContainer = document.getElementById('selectedTags');
+        const tagElement = Array.from(selectedTagsContainer.children)
+            .find(el => el.textContent.trim().replace('×', '') === tag);
+        if (tagElement) {
+            selectedTagsContainer.removeChild(tagElement);
+        }
+        updateSearchButton();
+        
+        console.log('Removed tag:', tag);
+        console.log('Current tags:', selectedTags);
+    }
+}
+
+function updateSearchButton() {
+    const searchButton = document.getElementById('searchButton');
+    const hasSelectedTags = selectedTags.length > 0;
+    searchButton.disabled = !hasSelectedTags;
+    
+    console.log('Search button state updated:', {
+        hasSelectedTags: hasSelectedTags,
+        isDisabled: searchButton.disabled
+    });
+}
+
+async function searchImages() {
+    const searchButton = document.getElementById('searchButton');
+    const searchResults = document.getElementById('searchResults');
+    
+    try {
+        searchButton.disabled = true;
+        searchResults.innerHTML = `
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Searching for images...</p>
+            </div>
+        `;
+
+        console.log('Starting search with tags:', selectedTags);
+
+        const requestData = {
+            tags: selectedTags.map(tag => tag.trim()).filter(tag => tag)
+        };
+
+        console.log('Request data:', requestData);
+
+        const response = await fetch('/api/search-by-tags', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        console.log('Search response status:', response.status);
+        
+        if (response.status === 401) {
+            window.location.href = '/login';
+            throw new Error('Authentication expired, please login again');
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorData.message || `Search failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Search response data:', data);
+
+        if (data.links && Array.isArray(data.links)) {
+            if (data.links.length > 0) {
+                searchResults.innerHTML = '';
+                data.links.forEach((imageUrl, index) => {
+                    if (typeof imageUrl === 'string' && imageUrl.trim()) {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'result-item';
+                        
+                        const originalUrl = new URLSearchParams(imageUrl.split('?')[1]).get('url');
+                        
+                        resultItem.innerHTML = `
+                            <div class="image-container">
+                                <img src="${imageUrl}" alt="Search Result ${index + 1}" 
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTG9hZCBGYWlsZWQ8L3RleHQ+PC9zdmc+'">
+                            </div>
+                            <div class="url-info">
+                                <div class="label">Image ${index + 1} URL:</div>
+                                ${originalUrl || 'Unable to get original URL'}
+                            </div>
+                        `;
+                        searchResults.appendChild(resultItem);
+                    }
+                });
+                console.log(`Found ${data.links.length} images`);
+            } else {
+                searchResults.innerHTML = `
+                    <div class="no-results">
+                        <h3>No Images Found</h3>
+                        <p>Try different tags or remove some tags to broaden your search</p>
+                        <p>Current tags: ${selectedTags.join(', ')}</p>
+                    </div>
+                `;
+                console.log('No images found');
+            }
+        } else {
+            throw new Error('Invalid response data format');
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        if (error.message === 'Authentication expired, please login again') {
+            searchResults.innerHTML = `
+                <div class="no-results">
+                    <h3>Authentication Expired</h3>
+                    <p>Redirecting to login page...</p>
+                </div>
+            `;
+        } else {
+            searchResults.innerHTML = `
+                <div class="no-results">
+                    <h3>Search Error</h3>
+                    <p>${error.message}</p>
+                    <p>Please try again or try different tags</p>
+                </div>
+            `;
+        }
+    } finally {
+        updateSearchButton();
+    }
+}
+</script>
+{% endblock %} 
