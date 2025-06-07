@@ -7,7 +7,7 @@
 </head>
 <body>
   <h1>BirdTag - Submit a Query</h1>
-  <form action="results.html" method="GET">
+  <form id="queryForm">
     <label for="tag">Bird Tag:</label>
     <input type="text" id="tag" name="tag" required><br><br>
 
@@ -16,7 +16,43 @@
 
     <input type="submit" value="Submit Query">
   </form>
+
+  <div id="result"></div>
+
   <br>
   <a href="dashboard.html">⬅ Back to Dashboard</a>
+
+  <script>
+    const form = document.getElementById('queryForm');
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault(); // prevent form from submitting normally
+
+      const tag = document.getElementById('tag').value;
+      const date = document.getElementById('date').value;
+
+      try {
+        const response = await fetch('https://v718z5kxih.execute-api.us-east-1.amazonaws.com/dev', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            tag: tag,
+            date: date
+          })
+        });
+
+        const data = await response.json();
+
+        // display the result
+        document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result').innerText = 'Error querying API.';
+      }
+    });
+  </script>
 </body>
 </html>
+
