@@ -17,7 +17,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden; /* ❗ 防止左右滑动 */
+      overflow: hidden;
     }
 
     .main-box {
@@ -124,18 +124,9 @@
       }
 
       try {
-        // 🧪 模拟数据
-        const mockData = {
-          full_url: "https://example.com/file1.jpg",
-          file_type: "image",
-          tags: { bird: 3, sky: 1 }
-        };
+        const response = await fetch(`https://8wpmntawc1.execute-api.us-east-1.amazonaws.com/dev?file_id=${fileId}`);
+        const data = await response.json();
 
-        // ✅ 替换为真实后端调用
-        // const response = await fetch(`https://your-api.com/file-info?file_id=${fileId}`);
-        // const data = await response.json();
-
-        const data = mockData;
         const fileUrl = data.full_url;
         const fileType = data.file_type;
         const tags = data.tags;
