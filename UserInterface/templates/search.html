@@ -7,7 +7,7 @@
         Enter any tags to search for images, or use the time range search below.
     </div>
     
-    <!-- Tag search section -->
+    <!-- 标签搜索部分 -->
     <div class="search-section">
         <h3>Search by Tags</h3>
         <div class="search-box">
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <!-- Time Search Section -->
+    <!-- 时间搜索部分 -->
     <div class="search-section">
         <h3>Search by Time Range</h3>
         <div class="search-box">
@@ -53,6 +53,17 @@
 </div>
 
 <style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to bottom right, #d0f0fd, #b0d4f7, #8ecae6);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
 .search-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -701,7 +712,7 @@ function toggleUrls(element) {
     element.classList.toggle('expanded');
     urlContent.classList.toggle('visible');
     
-    // Update button text
+    // 更新按钮文本
     element.querySelector('.toggle-text').textContent = 
         isExpanded ? 'Show URLs' : 'Hide URLs';
 }
@@ -722,7 +733,7 @@ function hideDeleteModal() {
     if (modal) {
         modal.classList.remove('visible');
     }
-    // Reset the current picture information to be deleted
+    // 重置当前要删除的图片信息
     currentImageToDelete = null;
 }
 
@@ -732,7 +743,7 @@ async function deleteImage(imageId, resultItem) {
         return;
     }
 
-    // Add loading animation
+    // 添加加载动画
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'loading-overlay';
     loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
@@ -760,13 +771,13 @@ async function deleteImage(imageId, resultItem) {
         console.log('Delete response data:', data);
 
         if (response.ok) {
-            // After successful deletion, add a fade-out animation and remove the element
+            // 成功删除后，添加淡出动画并移除元素
             resultItem.style.transition = 'all 0.5s ease';
             resultItem.style.opacity = '0';
             resultItem.style.transform = 'scale(0.9)';
             setTimeout(() => {
                 resultItem.remove();
-                // Check if there are any other results
+                // 检查是否还有其他结果
                 const remainingResults = document.querySelectorAll('.result-item');
                 if (remainingResults.length === 0) {
                     const searchResults = document.getElementById('searchResults');
@@ -963,7 +974,7 @@ async function searchByTime() {
     }
 }
 
-// Modify the searchImages function to adapt to the new API response format
+// 修改searchImages函数，适配新的API响应格式
 async function searchImages() {
     const searchButton = document.getElementById('searchButton');
     const searchResults = document.getElementById('searchResults');
