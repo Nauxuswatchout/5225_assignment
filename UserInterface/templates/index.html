@@ -41,12 +41,21 @@
         </div>
     </a>
 
-    <a href="#" class="card" title="Organize and manage your image collection">
-        <div class="card-content">
-            <img src="{{ url_for('static', filename='images/management-icon.png') }}" alt="Management" class="card-icon">
-            <span class="card-title">Management</span>
-        </div>
-    </a>
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('management') }}" class="card" title="Manage and delete images">
+            <div class="card-content">
+                <img src="{{ url_for('static', filename='images/management-icon.png') }}" alt="Management" class="card-icon">
+                <span class="card-title">Management</span>
+            </div>
+        </a>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="card" title="Please login to manage images">
+            <div class="card-content">
+                <img src="{{ url_for('static', filename='images/management-icon.png') }}" alt="Management" class="card-icon">
+                <span class="card-title">Management</span>
+            </div>
+        </a>
+    {% endif %}
 </div>
 
 <style>
@@ -120,7 +129,7 @@
 .card::after {
     content: attr(title);
     position: absolute;
-    bottom: -2rem;
+    bottom: -1rem;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0,0,0,0.8);
@@ -138,9 +147,9 @@
 }
 
 .card:hover::after {
-    bottom: 1rem;
     opacity: 1;
     visibility: visible;
+    bottom: -0.1rem;
 }
 </style>
 {% endblock %} 

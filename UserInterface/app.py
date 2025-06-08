@@ -395,13 +395,12 @@ def get_upload_url_proxy():
         app.logger.info("Requesting upload URL from API...")
         
         headers = {
-            'Authorization': f"Bearer {id_token}",
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Authorization': f"Bearer {id_token}"
         }
         
         app.logger.debug(f"Request headers: {headers}")
         
+        API_BASE_URL = "https://pzsjhrvhz8.execute-api.us-east-1.amazonaws.com/dev"
         response = requests.get(
             f"{API_BASE_URL}/get-upload-url",
             headers=headers,
@@ -444,6 +443,8 @@ def upload_to_s3_proxy():
         if not id_token:
             return jsonify({'error': 'No authentication token found'}), 401
 
+        # 获取上传URL
+        API_BASE_URL = "https://pzsjhrvhz8.execute-api.us-east-1.amazonaws.com/dev"
         headers = {'Authorization': f"Bearer {id_token}"}
         response = requests.get(f"{API_BASE_URL}/get-upload-url", headers=headers)
         
@@ -454,6 +455,7 @@ def upload_to_s3_proxy():
         upload_url = upload_info['upload_url']
         s3_key = upload_info['s3_key']
 
+        # 上传文件到S3
         upload_response = requests.put(
             upload_url,
             data=file.stream.read(),
@@ -567,24 +569,12 @@ def search_by_tags():
                 if isinstance(result, dict) and 'body' in result:
                     try:
                         body = json.loads(result['body']) if isinstance(result['body'], str) else result['body']
-                        # 修改图片URL为代理URL
-                        if 'links' in body:
-                            body['links'] = [
-                                f"/api/proxy-image?url={quote(url)}"
-                                for url in body['links']
-                            ]
                         app.logger.info(f"找到 {len(body.get('links', []))} 张图片")
                         return jsonify(body), 200
                     except json.JSONDecodeError:
                         app.logger.error("解析Lambda响应body失败")
                         return jsonify({'error': '响应格式不正确'}), 500
                 else:
-                    # 修改图片URL为代理URL
-                    if 'links' in result:
-                        result['links'] = [
-                            f"/api/proxy-image?url={quote(url)}"
-                            for url in result['links']
-                        ]
                     app.logger.info(f"找到 {len(result.get('links', []))} 张图片")
                     return jsonify(result), 200
             elif response.status_code == 403:
@@ -602,12 +592,6 @@ def search_by_tags():
                         result = response.json()
                         if isinstance(result, dict) and 'body' in result:
                             body = json.loads(result['body']) if isinstance(result['body'], str) else result['body']
-                            # 修改图片URL为代理URL
-                            if 'links' in body:
-                                body['links'] = [
-                                    f"/api/proxy-image?url={quote(url)}"
-                                    for url in body['links']
-                                ]
                             app.logger.info(f"令牌刷新后找到 {len(body.get('links', []))} 张图片")
                             return jsonify(body), 200
                 return jsonify({'error': '认证已过期，请重新登录'}), 401
@@ -749,6 +733,224 @@ def refresh_auth_token():
         app.logger.error(f"刷新令牌失败: {str(e)}")
         
     return False
+
+@app.route('/api/search-by-time', methods=['POST'])
+@login_required
+def search_by_time():
+    try:
+        if not session.get('id_token'):
+            return jsonify({'error': '认证已过期，请重新登录'}), 401
+
+        data = request.get_json()
+        if not data or 'start_time' not in data or 'end_time' not in data:
+            return jsonify({'error': '未提供开始时间或结束时间'}), 400
+
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        
+        if not isinstance(start_time, int) or not isinstance(end_time, int):
+            return jsonify({'error': '时间必须是整数'}), 400
+            
+        if start_time >= end_time:
+            return jsonify({'error': '开始时间必须小于结束时间'}), 400
+
+        app.logger.info(f"按时间搜索: {start_time} 到 {end_time}")
+        
+        url = "https://hvffd89txl.execute-api.us-east-1.amazonaws.com/dev/SearchByTimeLambda"
+        headers = {
+            'Authorization': f"Bearer {session['id_token']}",
+            'Content-Type': 'application/json'
+        }
+        
+        app.logger.debug(f"请求头: {headers}")
+        
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                json={
+                    'start_time': start_time,
+                    'end_time': end_time
+                },
+                timeout=10
+            )
+
+            app.logger.info(f"API响应状态: {response.status_code}")
+            app.logger.debug(f"API响应内容: {response.text}")
+
+            if response.status_code == 200:
+                result = response.json()
+                if isinstance(result, dict) and 'body' in result:
+                    try:
+                        body = json.loads(result['body']) if isinstance(result['body'], str) else result['body']
+                        app.logger.info(f"找到 {len(body.get('results', []))} 条记录")
+                        return jsonify(body), 200
+                    except json.JSONDecodeError:
+                        app.logger.error("解析Lambda响应body失败")
+                        return jsonify({'error': '响应格式不正确'}), 500
+                else:
+                    app.logger.info(f"找到 {len(result.get('results', []))} 条记录")
+                    return jsonify(result), 200
+            elif response.status_code == 403:
+                # 令牌过期，尝试刷新
+                if refresh_auth_token():
+                    # 重试请求
+                    headers['Authorization'] = f"Bearer {session['id_token']}"
+                    response = requests.post(
+                        url,
+                        headers=headers,
+                        json={
+                            'start_time': start_time,
+                            'end_time': end_time
+                        },
+                        timeout=10
+                    )
+                    if response.status_code == 200:
+                        result = response.json()
+                        if isinstance(result, dict) and 'body' in result:
+                            body = json.loads(result['body']) if isinstance(result['body'], str) else result['body']
+                            app.logger.info(f"令牌刷新后找到 {len(body.get('results', []))} 条记录")
+                            return jsonify(body), 200
+                return jsonify({'error': '认证已过期，请重新登录'}), 401
+            else:
+                error_message = response.text
+                app.logger.error(f"API请求失败，状态码 {response.status_code}: {error_message}")
+                return jsonify({
+                    'error': f"搜索失败: {response.status_code} {response.reason}",
+                    'details': error_message
+                }), response.status_code
+
+        except requests.RequestException as e:
+            app.logger.error(f"请求错误: {str(e)}")
+            return jsonify({'error': f'搜索请求失败: {str(e)}'}), 500
+
+    except Exception as e:
+        app.logger.error(f"意外错误: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/delete-image', methods=['POST'])
+@login_required
+def delete_image():
+    try:
+        if not session.get('id_token'):
+            return jsonify({'error': '认证已过期，请重新登录'}), 401
+
+        data = request.get_json()
+        if not data or 'image_id' not in data:
+            return jsonify({'error': '未提供图片ID'}), 400
+
+        image_id = data.get('image_id')
+        
+        app.logger.info(f"删除图片: {image_id}")
+        
+        url = "https://wthhbyow7d.execute-api.us-east-1.amazonaws.com/dev/image"
+        headers = {
+            'Authorization': f"Bearer {session['id_token']}",
+            'Content-Type': 'application/json'
+        }
+        
+        app.logger.debug(f"请求头: {headers}")
+        
+        response = requests.post(
+            url,
+            headers=headers,
+            json={'image_id': image_id},
+            timeout=10
+        )
+
+        app.logger.info(f"API响应状态: {response.status_code}")
+        app.logger.debug(f"API响应内容: {response.text}")
+
+        if response.status_code == 200:
+            result = response.json()
+            return jsonify(result), 200
+        elif response.status_code == 403:
+            # 令牌过期，尝试刷新
+            if refresh_auth_token():
+                headers['Authorization'] = f"Bearer {session['id_token']}"
+                response = requests.post(
+                    url,
+                    headers=headers,
+                    json={'image_id': image_id},
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    return jsonify(result), 200
+            return jsonify({'error': '认证已过期，请重新登录'}), 401
+        else:
+            error_message = response.text
+            app.logger.error(f"API请求失败，状态码 {response.status_code}: {error_message}")
+            return jsonify({
+                'error': f"删除失败: {response.status_code} {response.reason}",
+                'details': error_message
+            }), response.status_code
+
+    except requests.RequestException as e:
+        app.logger.error(f"请求错误: {str(e)}")
+        return jsonify({'error': f'删除请求失败: {str(e)}'}), 500
+    except Exception as e:
+        app.logger.error(f"意外错误: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/management')
+@login_required
+def management():
+    return render_template('management.html')
+
+@app.route('/api/get-all-images', methods=['GET'])
+@login_required
+def get_all_images():
+    try:
+        if not session.get('id_token'):
+            return jsonify({'error': '认证已过期，请重新登录'}), 401
+
+        url = "https://v1w66xnsq0.execute-api.us-east-1.amazonaws.com/dev/DeleteAll"
+        headers = {
+            'Authorization': f"Bearer {session['id_token']}",
+            'Content-Type': 'application/json'
+        }
+        
+        app.logger.debug(f"请求头: {headers}")
+        
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
+
+        app.logger.info(f"API响应状态: {response.status_code}")
+        app.logger.debug(f"API响应内容: {response.text}")
+
+        if response.status_code == 200:
+            result = response.json()
+            return jsonify(result), 200
+        elif response.status_code == 403:
+            if refresh_auth_token():
+                headers['Authorization'] = f"Bearer {session['id_token']}"
+                response = requests.get(
+                    url,
+                    headers=headers,
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    return jsonify(result), 200
+            return jsonify({'error': '认证已过期，请重新登录'}), 401
+        else:
+            error_message = response.text
+            app.logger.error(f"API请求失败，状态码 {response.status_code}: {error_message}")
+            return jsonify({
+                'error': f"获取图片失败: {response.status_code} {response.reason}",
+                'details': error_message
+            }), response.status_code
+
+    except requests.RequestException as e:
+        app.logger.error(f"请求错误: {str(e)}")
+        return jsonify({'error': f'获取图片请求失败: {str(e)}'}), 500
+    except Exception as e:
+        app.logger.error(f"意外错误: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # Create database tables
 with app.app_context():
