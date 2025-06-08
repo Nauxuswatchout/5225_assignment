@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- 矩阵背景 -->
+<!-- Matrix Background -->
 <canvas id="matrix-background" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
 
 <div class="management-container">
@@ -28,7 +28,7 @@
     </div>
 </div>
 
-<!-- 自定义通知弹窗 -->
+<!-- Custom notification pop-up -->
 <div id="notification" class="notification">
     <div class="notification-content">
         <div class="notification-icon">
@@ -357,7 +357,7 @@
     color: #dc3545;
 }
 
-/* 矩阵背景样式 */
+/* Matrix background style */
 #matrix-background {
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -373,7 +373,7 @@
     opacity: 1;
 }
 
-/* 通知弹窗样式 */
+/* Notification pop-up style */
 .notification {
     display: none;
     position: fixed;
@@ -481,10 +481,10 @@
 let selectedImages = new Set();
 let allImages = [];
 
-// 页面加载时获取所有图片
+// Get all images when the page loads
 document.addEventListener('DOMContentLoaded', loadImages);
 
-// 显示通知
+// Show Notifications
 function showNotification(message, details, isSuccess = true) {
     const notification = document.getElementById('notification');
     notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
@@ -493,7 +493,7 @@ function showNotification(message, details, isSuccess = true) {
     notification.classList.add('visible');
 }
 
-// 隐藏通知
+// Hide notifications
 function hideNotification() {
     const notification = document.getElementById('notification');
     notification.classList.remove('visible');
@@ -515,10 +515,10 @@ async function loadImages() {
         const data = await response.json();
         console.log('API Response:', data);
 
-        // 解析嵌套的响应结构
+        // Parsing nested response structures
         let results;
         if (data.body) {
-            // 如果body是字符串，需要解析它
+            // If body is a string, you need to parse it
             const bodyData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
             results = bodyData.results;
         } else {
@@ -650,13 +650,13 @@ async function deleteSelected() {
     let failCount = 0;
     const deleteErrors = [];
 
-    // 启动矩阵背景
+    // Startup matrix background
     const matrixCanvas = document.getElementById('matrix-background');
     matrixCanvas.style.display = 'block';
     setTimeout(() => matrixCanvas.classList.add('visible'), 10);
     initMatrix(matrixCanvas);
 
-    // 显示进度条
+    // Show progress bar
     const progressOverlay = document.createElement('div');
     progressOverlay.className = 'progress-overlay';
     progressOverlay.innerHTML = `
@@ -703,10 +703,10 @@ async function deleteSelected() {
                     console.log(`Successfully deleted image ${imageId}`);
                     successCount++;
                     
-                    // 从allImages中移除已删除的图片
+                    // Remove deleted images from allImages
                     allImages = allImages.filter(img => img.image_id !== imageId);
                     
-                    // 找到对应的DOM元素并添加淡出动画
+                    // Find the corresponding DOM element and add a fade-out animation
                     const imageElement = document.querySelector(`.image-card[data-image-id="${imageId}"]`);
                     if (imageElement) {
                         imageElement.style.transition = 'all 0.5s ease';
@@ -729,29 +729,29 @@ async function deleteSelected() {
 
             count++;
             updateProgress(count);
-            await new Promise(resolve => setTimeout(resolve, 100)); // 添加小延迟防止请求过快
+            await new Promise(resolve => setTimeout(resolve, 100)); // Add a small delay to prevent requests from being too fast
         }
     } finally {
         console.log('Deletion process completed');
         console.log(`Success: ${successCount}, Failed: ${failCount}`);
 
-        // 停止矩阵背景
+        // Stop Matrix Background
         matrixCanvas.classList.remove('visible');
         setTimeout(() => {
             matrixCanvas.style.display = 'none';
             stopMatrix();
         }, 500);
 
-        // 移除进度条
+        // Remove progress bar
         setTimeout(() => {
             progressOverlay.remove();
         }, 500);
 
-        // 清除选择
+        // Clear Selection
         selectedImages.clear();
         updateDeleteButton();
 
-        // 如果所有图片都已删除，显示空状态
+        // If all images have been deleted, show empty state
         if (allImages.length === 0) {
             const grid = document.getElementById('imageGrid');
             grid.innerHTML = `
@@ -762,7 +762,7 @@ async function deleteSelected() {
             `;
         }
 
-        // 显示结果通知
+        // Display result notification
         const message = 'Deletion Complete';
         const details = `✓ ${successCount} images deleted successfully\n` +
                        `✗ ${failCount} images failed to delete\n\n` +
