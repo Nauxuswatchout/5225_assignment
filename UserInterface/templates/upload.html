@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- 矩阵背景 -->
+<!-- Matrix Background -->
 <canvas id="matrix-background" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
 
 <div class="upload-container">
@@ -17,7 +17,7 @@
     <div class="upload-status" id="uploadStatus"></div>
 </div>
 
-<!-- 上传通知 -->
+<!-- Upload notification -->
 <div id="notification" class="notification">
     <div class="notification-content">
         <div class="notification-icon">
@@ -162,7 +162,7 @@ html, body {
     transition: width 0.3s ease;
 }
 
-/* 矩阵背景样式 */
+/* Matrix background style */
 #matrix-background {
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -178,7 +178,7 @@ html, body {
     opacity: 1;
 }
 
-/* 通知样式 */
+/* Notification Style */
 .notification {
     display: none;
     position: fixed;
@@ -291,7 +291,7 @@ html, body {
 
 <script src="{{ url_for('static', filename='js/matrix.js') }}"></script>
 <script>
-// 全局函数
+// Global Functions
 function showNotification(message, details, isSuccess = true) {
     const notification = document.getElementById('notification');
     notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
@@ -304,7 +304,7 @@ function hideNotification() {
     const notification = document.getElementById('notification');
     notification.classList.remove('visible');
     
-    // 恢复页面原始状态
+    // Restore the page to its original state
     const matrixCanvas = document.getElementById('matrix-background');
     const uploadBox = document.getElementById('uploadBox');
     const statusItems = document.querySelectorAll('.status-item');
@@ -361,11 +361,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 处理文件上传
+    // Handling file uploads
     async function uploadFile(file) {
         if (!uploadInProgress) {
             uploadInProgress = true;
-            // 启动矩阵背景
+            // Startup matrix background
             const matrixCanvas = document.getElementById('matrix-background');
             const uploadBox = document.getElementById('uploadBox');
             
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             initMatrix(matrixCanvas);
         }
 
-        // 创建状态元素
+        // Creating a state element
         const statusItem = document.createElement('div');
         statusItem.className = 'status-item matrix-active';
         statusItem.innerHTML = `
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 progressBar.style.width = '100%';
                 
-                // 添加预览
+                // Add Preview
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const previewItem = document.createElement('div');
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 reader.readAsDataURL(file);
 
-                // 显示成功消息
+                // Display success message
                 showNotification(
                     'Upload Successful',
                     `File: ${file.name}\nS3 Key: ${result.s3_key}`,
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
 
-        // 检查是否所有上传都完成
+        // Check if all uploads are complete
         const inProgressUploads = uploadStatus.querySelectorAll('.progress-bar[style="width: 100%"]');
         if (inProgressUploads.length === uploadStatus.children.length) {
             uploadInProgress = false;
