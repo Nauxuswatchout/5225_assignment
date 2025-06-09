@@ -2,7 +2,7 @@
 
 {% block content %}
 <!-- Matrix Background -->
-<canvas id="matrix-background" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
+<canvas id="matrix-background" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
 
 <div class="upload-container">
     <h2>Upload Images</h2>
@@ -17,7 +17,7 @@
     <div class="upload-status" id="uploadStatus"></div>
 </div>
 
-<!-- Upload notification -->
+<!-- Upload Notification -->
 <div id="notification" class="notification">
     <div class="notification-content">
         <div class="notification-icon">
@@ -48,7 +48,7 @@ html, body {
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent to show matrix */
     border-radius: 8px;
     transition: all 0.3s ease;
 }
@@ -65,8 +65,8 @@ html, body {
 }
 
 .upload-box.matrix-active {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3); /* More visible matrix background */
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .upload-box.drag-over {
@@ -92,6 +92,9 @@ html, body {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
     margin-top: 2rem;
+    background-color: rgba(255, 255, 255, 0.3); /* Slight background to preview */
+    padding: 1rem;
+    border-radius: 8px;
 }
 
 .preview-item {
@@ -171,7 +174,8 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0; /* Optimized */
+    pointer-events: none; /* Allow interaction with page */
 }
 
 #matrix-background.visible {
@@ -291,7 +295,6 @@ html, body {
 
 <script src="{{ url_for('static', filename='js/matrix.js') }}"></script>
 <script>
-// Global Functions
 function showNotification(message, details, isSuccess = true) {
     const notification = document.getElementById('notification');
     notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
@@ -303,16 +306,15 @@ function showNotification(message, details, isSuccess = true) {
 function hideNotification() {
     const notification = document.getElementById('notification');
     notification.classList.remove('visible');
-    
-    // Restore the page to its original state
+
     const matrixCanvas = document.getElementById('matrix-background');
     const uploadBox = document.getElementById('uploadBox');
     const statusItems = document.querySelectorAll('.status-item');
-    
+
     matrixCanvas.classList.remove('visible');
     uploadBox.classList.remove('matrix-active');
     statusItems.forEach(item => item.classList.remove('matrix-active'));
-    
+
     setTimeout(() => {
         matrixCanvas.style.display = 'none';
         stopMatrix();
@@ -326,7 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadStatus = document.getElementById('uploadStatus');
     let uploadInProgress = false;
 
-    // Handle drag and drop events
     uploadBox.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadBox.classList.add('drag-over');
@@ -342,7 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
         handleFiles(e.dataTransfer.files);
     });
 
-    // Handle click to upload
     uploadBox.addEventListener('click', () => {
         fileInput.click();
     });
@@ -361,24 +361,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handling file uploads
     async function uploadFile(file) {
         if (!uploadInProgress) {
             uploadInProgress = true;
-            // Startup matrix background
+
             const matrixCanvas = document.getElementById('matrix-background');
             const uploadBox = document.getElementById('uploadBox');
-            
+
             matrixCanvas.style.display = 'block';
             uploadBox.classList.add('matrix-active');
-            
+
             setTimeout(() => {
                 matrixCanvas.classList.add('visible');
             }, 10);
             initMatrix(matrixCanvas);
         }
 
-        // Creating a state element
         const statusItem = document.createElement('div');
         statusItem.className = 'status-item matrix-active';
         statusItem.innerHTML = `
@@ -390,9 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadStatus.appendChild(statusItem);
 
         try {
-            console.log('Starting upload process for:', file.name);
             const progressBar = statusItem.querySelector('.progress-bar');
-
             const formData = new FormData();
             formData.append('file', file);
 
@@ -405,8 +401,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 progressBar.style.width = '100%';
-                
-                // Add Preview
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const previewItem = document.createElement('div');
@@ -419,7 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 reader.readAsDataURL(file);
 
-                // Display success message
                 showNotification(
                     'Upload Successful',
                     `File: ${file.name}\nS3 Key: ${result.s3_key}`,
@@ -429,7 +422,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(result.error || 'Upload failed');
             }
         } catch (error) {
-            console.error('Upload error:', error);
             showNotification(
                 'Upload Failed',
                 `File: ${file.name}\nError: ${error.message}`,
@@ -437,7 +429,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
 
-        // Check if all uploads are complete
         const inProgressUploads = uploadStatus.querySelectorAll('.progress-bar[style="width: 100%"]');
         if (inProgressUploads.length === uploadStatus.children.length) {
             uploadInProgress = false;
@@ -445,4 +436,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}
